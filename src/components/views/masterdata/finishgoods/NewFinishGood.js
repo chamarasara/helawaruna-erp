@@ -109,6 +109,7 @@ class NewFinishGood extends React.Component {
                                     <option value="Capsule">Capsule</option>
                                     <option value="Tablet">Tablet</option>
                                     <option value="Powder">Powder</option>
+                                    <option value="Other">Other</option>
                                 </Field>
                             </div>
                             <div className="three wide field">

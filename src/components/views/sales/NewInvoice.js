@@ -57,7 +57,17 @@ class NewInvoice extends React.Component {
             </div>
         </div>
     )
+    renderSuccessMessage() {
+        if (this.props.invoice[0] === 200) {
+            return (
+                <div className="ui success message">
+                    <div className="header">Successfull !</div>
+                </div>
+            )
+        }
+    }
     onSubmit = (formValues) => {
+        console.log(formValues)
         this.props.createInvoice(formValues)
     }
     renderProducts() {
@@ -71,10 +81,6 @@ class NewInvoice extends React.Component {
         return (
             <div>
                 <ul>
-                    <li>
-                        <button className="mini ui primary button" type="button" onClick={() => fields.push()}>Add Product</button>
-                        {submitFailed && error && <span style={{ color: "red" }}>{error}</span>}
-                    </li>
                     {fields.map((products, index) => <li key={index}>
                         <label htmlFor={products}>Product #{index + 1}</label>
                         <div className="fields">
@@ -104,12 +110,52 @@ class NewInvoice extends React.Component {
                             </div>
                         </div>
                     </li>)}
+                    <li>
+                        <button className="mini ui primary button" type="button" onClick={() => fields.push()}>Add Product</button>
+                        {submitFailed && error && <span style={{ color: "red" }}>{error}</span>}
+                    </li>
                 </ul>
             </div>
         )
     }
     clearValues() {
         window.location.reload()
+    }
+    renderAdditionalChargesDropDown = ({ fields, meta: { error, submitFailed } }) => {
+        return (
+            <div>
+                <ul>
+                    {fields.map((additionalCharges, index) => <li key={index}>
+                        <label htmlFor={additionalCharges}>Expense #{index + 1}</label>
+                        <div className="fields">
+                            <div className="four wide field">
+                                <Field name={`${additionalCharges}.reason`} type="text" required component={this.renderSelectField} placeholder="Expense Name" >
+                                    <option>-Select Expnese-</option>
+                                    <option value="Transport">Transport</option>
+                                    <option value="Sea Freight">Sea Freight</option>
+                                    <option value="Air Freight">Air Freight</option>
+                                    <option value="Custom Duty">Custom Duty</option>
+                                    <option value="Documents Charges">Documents Charges</option>
+                                    <option value="Service Fee">Service Fee</option>
+                                    <option value="Other">Other</option>
+                                </Field>
+                            </div>
+                            <div className="four wide field">
+                                <Field name={`${additionalCharges}.amount`} type="number" required component={this.renderInput} placeholder="Amount" >
+                                </Field>
+                            </div>
+                            <div className="eight wide field">
+                                <button className="mini ui red button" type="button" onClick={() => fields.remove(index)}>Remove</button>
+                            </div>
+                        </div>
+                    </li>)}
+                    <li>
+                        <button className="mini ui primary button" type="button" onClick={() => fields.push()}>Add Expense</button>
+                        {submitFailed && error && <span style={{ color: "red" }}>{error}</span>}
+                    </li>
+                </ul>
+            </div>
+        )
     }
     renderQuotations() {
         return this.props.quotations.map(quotation => {
@@ -123,53 +169,62 @@ class NewInvoice extends React.Component {
     render() {
         return (
             <div className="pusher">
-                <div className="ui basic segment" style={{ paddingLeft: "150px", paddingTop: "60px" }}>
-                    <h3>Create Invoice</h3>
-                    <form className="ui mini form error" onSubmit={this.props.handleSubmit(this.onSubmit)}>
-                        <div className="fields">
-                            <div className="six wide field">
-                                Customer Name <span style={{ color: "red", fontSize: "18px" }}>*</span>
-                                <Field name="customerId" component={this.renderSelectField} placeholder="" type="text" >
-                                    <option>-Select Customer-</option>
-                                    {this.renderCustomers()}
-                                </Field>
+                <div className="ui basic segment" style={{ paddingLeft: "150px", paddingTop: "90px" }}>
+                    <div className="ui raised segment" style={{ paddingTop: "20px", paddingLeft: "30px", paddingBottom: "20px" }}>
+                        <h3>Create Invoice</h3>
+                        <form className="ui mini form error" onSubmit={this.props.handleSubmit(this.onSubmit)}>
+                            <div className="fields">
+                                <div className="six wide field">
+                                    Customer Name <span style={{ color: "red", fontSize: "18px" }}>*</span>
+                                    <Field name="customerId" component={this.renderSelectField} placeholder="" type="text" >
+                                        <option>-Select Customer-</option>
+                                        {this.renderCustomers()}
+                                    </Field>
+                                </div>
+                                <div className="six wide field">
+                                    Quotation (Optional)
+                                    <Field name="quotationNumber" component={this.renderSelectField} placeholder="" type="text" >
+                                        <option>-Select Quotation-</option>
+                                        {this.renderQuotations()}
+                                    </Field>
+                                </div>
                             </div>
-                            <div className="six wide field">
-                                Quotation (Optional)
-                                <Field name="quotationNumber" component={this.renderSelectField} placeholder="" type="text" >
-                                    <option>-Select Quotation-</option>
-                                    {this.renderQuotations()}
-                                </Field>
+                            <div className="fields">
+                                <div className="six wide field">
+                                    Remarks (Optional)
+                                    <Field name="remarks" type="text" component="input" placeholder="Remarks" />
+                                </div>
+                                <div className="six wide field">
+                                    Customer Reference (Optional)
+                                    <Field name="reference" type="text" component="input" placeholder="Cusomer Reference" />
+                                </div>
                             </div>
-                        </div>
-                        <div className="fields">
-                            <div className="six wide field">
-                                Remarks (Optional)
-                                <Field name="remarks" type="text" component="input" placeholder="Remarks" />
+                            <div className="fields">
+                                <div className="six wide field">
+                                    Transport Cost (Optional)
+                                    <Field name="transportCost" type="number" component="input" placeholder="Transport Cost" />
+                                </div>
                             </div>
-                            <div className="six wide field">
-                                Customer Reference (Optional)
-                                <Field name="reference" type="text" component="input" placeholder="Cusomer Reference" />
+                            <div className="fields">
+                                <div className="sixteen wide field">
+                                    Products <span style={{ color: "red", fontSize: "18px" }}>*</span>
+                                    <FieldArray name="products" component={this.renderProductsDropDown} />
+                                </div>
                             </div>
-                        </div>
-                        <div className="fields">
-                            <div className="six wide field">
-                                Transport Cost (Optional)
-                                <Field name="transportCost" type="number" component="input" placeholder="Transport Cost" />
-                            </div>                            
-                        </div>
-                        <div className="fields">
-                            <div className="sixteen wide field">
-                                Products <span style={{ color: "red", fontSize: "18px" }}>*</span>
-                                <FieldArray name="products" component={this.renderProductsDropDown} />
+                            <div className="fields">
+                                <div className="sixteen wide field">
+                                    Additional Charges
+                                    <FieldArray name="additionalCharges" component={this.renderAdditionalChargesDropDown} />
+                                </div>
                             </div>
-                        </div>
-                        <div className="field">
-                            <Link to={"/invoice-dashboard"} type="button" className="ui button">Back</Link>
-                            <button type="button" onClick={this.clearValues} className="ui red button">Clear</button>
-                            <button type="submit" disabled={this.props.submitting} className="ui primary button">Submit</button>
-                        </div>
-                    </form>
+                            <div className="field">
+                                <Link to={"/invoice-dashboard"} type="button" className="ui button">Back</Link>
+                                <button type="button" onClick={this.clearValues} className="ui red button">Clear</button>
+                                <button type="submit" disabled={this.props.submitting} className="ui primary button">Submit</button>
+                            </div>
+                        </form>
+                        {this.renderSuccessMessage()}
+                    </div>
                 </div>
             </div>
         )
@@ -222,10 +277,10 @@ const mapStateToProps = (state) => {
     const products = Object.values(state.finishGoods)
     const quotations = Object.values(state.quotations)
     const value = selector(state, 'quotationNumber')
+    const invoice = Object.values(state.invoices)
     const quotation = state.quotations[value]
-    console.log(quotation)
-    console.log(value)
-    return { errorMessage: state, customers: customers, products: products, quotations: quotations, initialValues: quotation, value: value };
+    console.log(invoice)
+    return { errorMessage: state, customers: customers, products: products, invoice, quotations: quotations, initialValues: quotation, value: value };
 }
 
 

@@ -162,6 +162,19 @@ class EditInvoice extends React.Component {
 
         return this.formatNumber(totalValue.reduce((a, b) => a + b, 0).toFixed(2))
     }
+    getAdditionalChargesTotal() {
+        const array = []
+        const totalArray = this.props.invoice.additionalCharges.map(data => {
+            let amount = Number(data.amount)
+            for (let i = 0; i < array.length; i++) {
+                array[i] = amount
+            }
+            console.log(amount)
+            return amount
+        })
+        const sumOfArray = totalArray.reduce((partial_sum, a) => partial_sum + a, 0)
+        return sumOfArray
+    }
     getSubTotalWithTransportCost() {
         if (!this.props.invoice.products) {
             return (
@@ -171,7 +184,6 @@ class EditInvoice extends React.Component {
         let quantities = this.props.invoice.products.map(product => {
             return product
         })
-        let transportCost = this.props.invoice.transportCost
         let rates = this.props.invoice.products.map(rate => {
             return rate
         })
@@ -179,13 +191,10 @@ class EditInvoice extends React.Component {
         for (let i = 0; i < Math.min(quantities.length); i++) {
             let quantity = quantities[i]
             let rate = rates[i]
-            totalValue[i] = (quantity.quantity * rate.sellingPrice) / 100 * (100 - quantity.discount);
-
-            console.log(totalValue.reduce((a, b) => a + b, 0))
-            //return totalValue
+            totalValue[i] = (quantity.quantity * rate.sellingPrice) / 100 * (100 - quantity.discount);            
         }
         const total = totalValue.reduce((a, b) => a + b, 0)
-        const subtotal = total + this.renderTransportCost()
+        const subtotal = total + this.getAdditionalChargesTotal()
         return this.formatNumber(subtotal.toFixed(2))
     }
     getReturnsSubTotal() {
@@ -823,7 +832,26 @@ class EditInvoice extends React.Component {
             return this.props.invoice.transportCost
         }
     }
-
+    renderAdditionalCharges() {
+        if (!this.props.invoice.additionalCharges) {
+            return (
+                <tr colSpan="9">
+                    <th colSpan="8" style={{ textAlign: "left" }}><span style={{ color: "#2185d0" }}>(+)</span> Additional Charges</th>
+                    <th colSpan="1" style={{ textAlign: "right" }}>0.00</th>
+                </tr>
+            )
+        }
+        return this.props.invoice.additionalCharges.map(data => {
+            console.log(data)
+            let amount = Number(data.amount)
+            return (
+                <tr colSpan="9">
+                    <th colSpan="8" style={{ textAlign: "right" }}><span style={{ color: "#2185d0" }}>(+)</span> {data.reason}</th>
+                    <th colSpan="1" style={{ textAlign: "right" }}>{this.formatNumber(amount.toFixed(2))}</th>
+                </tr>
+            )
+        })
+    }
     onClick = () => {
         this.props.printInvoice(this.props.invoice.id)
     }
@@ -868,21 +896,17 @@ class EditInvoice extends React.Component {
                             {this.renderInvoiceDetails()}
                         </tbody>
                         <tfoot>
-                            <tr colSpan="16">
-                                <th colSpan="7" style={{ textAlign: "right" }}></th>
-                                <th colSpan="8" style={{ textAlign: "right" }}>{this.getSubTotal()}</th>
+                            <tr colSpan="9">
+                                <th colSpan="8" style={{ textAlign: "right" }}></th>
+                                <th colSpan="1" style={{ textAlign: "right" }}>{this.getSubTotal()}</th>
                             </tr>
-                            <tr colSpan="16">
-                                <th colSpan="7" style={{ textAlign: "right" }}>(+) Transport Cost:</th>
-                                <th colSpan="8" style={{ textAlign: "right" }}>{this.formatNumber(this.renderTransportCost().toFixed(2))}</th>
-                            </tr>
-                            <tr colSpan="16">
-                                <th colSpan="7" style={{ textAlign: "right" }}>Subtotal:</th>
-                                <th colSpan="8" style={{ textAlign: "right" }}>{this.getSubTotalWithTransportCost()}</th>
+                            {this.renderAdditionalCharges()}
+                            <tr colSpan="9">
+                                <th colSpan="8" style={{ textAlign: "right" }}>Subtotal:</th>
+                                <th colSpan="1" style={{ textAlign: "right" }}>{this.getSubTotalWithTransportCost()}</th>
                             </tr>
                         </tfoot>
                     </table>
-
                 </Tab.Pane>
             },
             { menuItem: 'Returns Details', render: () => <Tab.Pane attached={false}>{this.renderReturnInvoiceDetails()}</Tab.Pane> },
