@@ -1471,8 +1471,9 @@ export const createInvoice = formValues => async dispatch => {
             'Authorization': token
         }
     };
-    const response = await api.post('api/sales/invoices/new-invoice', { ...formValues, user }, header);
+    const response = await api.post('/api/sales/invoices/new-invoice', { ...formValues, user }, header);
     dispatch({ type: CREATE_INVOICE, payload: response.status });  
+    console.log(response)
     setTimeout(function () {
         window.location.reload()
     }, 2000);

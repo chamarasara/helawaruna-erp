@@ -314,6 +314,9 @@ class SinglePurchaseOrderRaw extends React.Component {
                 <p>
                     <strong>Created By:</strong> {this.props.order.userName}
                 </p>
+                <p>
+                    <strong>Supplier Reference:</strong> {this.props.order.reference}
+                </p>
             </div>
         )
 

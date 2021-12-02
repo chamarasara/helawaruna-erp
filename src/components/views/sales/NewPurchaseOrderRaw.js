@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { fetchSuppliers, fetchRawMaterials, createPurchaseOrderRaw } from '../../../actions';
 
 class NewPurchaseOrder extends React.Component {
-
+    state = { value: '', length: 0 }
     componentDidMount() {
         this.props.fetchSuppliers()
         this.props.fetchRawMaterials()
@@ -57,7 +57,17 @@ class NewPurchaseOrder extends React.Component {
             </div>
         </div>
     )
+    renderTextArea = ({ input, label, type, meta, children }) => (
+        <div>
+            <label>{label}</label>
+            <div>
+                <textarea {...input} placeholder={label} rows="10" cols="5" />
+                {this.renderError(meta)}
+            </div>
+        </div>
+    );
     onSubmit = (formValues) => {
+       console.log(formValues)
         this.props.createPurchaseOrderRaw(formValues)
     }
     renderSuccessMessage() {
@@ -132,9 +142,15 @@ class NewPurchaseOrder extends React.Component {
                         <h3>Create Purchase Order RM</h3>
                         <form className="ui mini form error" onSubmit={handleSubmit(this.onSubmit)}>
                             <div className="six wide field">
+                                <label>Suppliers <span style={{ color: "red", fontSize: "18px" }}>*</span></label>
                                 <Field name="supplierId" component={this.renderSelectField} placeholder="" type="text" >
                                     <option>-Select Supplier-</option>
                                     {this.rendeSuppliers()}
+                                </Field>
+                            </div>
+                            <div className="six wide field">
+                                <label>Reference (Optional) </label>
+                                <Field name="reference" component={this.renderInput} placeholder="Reference" type="text" >
                                 </Field>
                             </div>
                             <div className="fields">
@@ -142,6 +158,14 @@ class NewPurchaseOrder extends React.Component {
                                     <label>Raw Materials- </label>
                                     <FieldArray name="rawMaterials" component={this.renderRawMaterialsDropDown} />
                                 </div>
+                            </div>
+                            <div className="six wide field">
+                                <label>Terms & Conditions <span style={{ color: "red", fontSize: "18px" }}>*</span>(Maximum 250 characters)</label>
+                                <Field name="conditions" component={this.renderTextArea} placeholder="Terms & Conditions" type="text" value={this.state.value} onChange={(e) => {
+                                    this.setState({ value: e.target.value })
+                                    this.setState({ length: e.target.value.split(' ').length })
+                                }}>
+                                </Field>
                             </div>
                             <div className="field">
                                 <Link to={"/purchase-order-dashboard-raw"} type="button" className="ui button">Back</Link>
@@ -157,14 +181,18 @@ class NewPurchaseOrder extends React.Component {
 }
 //Form input validation
 const validate = (formValues) => {
-    //console.log(formValues.supplierInvoice)
-
+    
     const errors = {}
     if (!formValues.supplierId) {
         errors.supplierId = 'Required';
     }
     if (!formValues.supplierInvoice) {
         errors.supplierInvoice = 'Required';
+    }
+    if (!formValues.conditions) {
+        errors.conditions = 'Required';
+    } else if (formValues.conditions.length > 250) {
+        errors.conditions = 'Maximum 250 characters'
     }
     if (!formValues.rawMaterials || !formValues.rawMaterials.length) {
         errors.rawMaterials = { _error: 'At least one material should be add' }
@@ -179,6 +207,9 @@ const validate = (formValues) => {
             if (!rawMaterials || !rawMaterials.quantity) {
                 productErrors.quantity = 'Required'
                 rawMaterialsArrayErrors[index] = productErrors
+            } else if (rawMaterials.quantity < 0) {
+                productErrors.quantity = 'Quantity should be more than 0'
+                rawMaterialsArrayErrors[index] = productErrors
             }
             if (!rawMaterials || !rawMaterials.uom) {
                 productErrors.uom = 'Required'
@@ -186,6 +217,9 @@ const validate = (formValues) => {
             }
             if (!rawMaterials || !rawMaterials.unitPrice) {
                 productErrors.unitPrice = 'Required'
+                rawMaterialsArrayErrors[index] = productErrors
+            } else if (rawMaterials.unitPrice < 0) {
+                productErrors.unitPrice = 'Unit price should be more than 0'
                 rawMaterialsArrayErrors[index] = productErrors
             }
         })
@@ -201,7 +235,7 @@ const formWrapped = reduxForm({
 })(NewPurchaseOrder);
 
 const mapStateToProps = (state) => {
-    console.log(state)
+    console.log(state.form.values)
     const suppliers = Object.values(state.supplier)
     const rawMaterials = Object.values(state.rawMaterials)
     const purchaseOrders = Object.values(state.purchaseOrdersRaw)
