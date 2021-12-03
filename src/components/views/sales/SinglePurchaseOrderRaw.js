@@ -317,6 +317,9 @@ class SinglePurchaseOrderRaw extends React.Component {
                 <p>
                     <strong>Supplier Reference:</strong> {this.props.order.reference}
                 </p>
+                <p>
+                    <strong>Terms & Conditions:</strong> {this.props.order.conditions}
+                </p>
             </div>
         )
 

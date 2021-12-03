@@ -4,13 +4,13 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchSuppliers, fetchPackingMaterials, createPurchaseOrderPacking } from '../../../actions';
 
-class NewPurchaseOrderRaw extends React.Component {
+class NewPurchaseOrderPacking extends React.Component {
 
     componentDidMount() {
         this.props.fetchSuppliers()
         this.props.fetchPackingMaterials()
     }
-   
+
     rendeSuppliers() {
         return this.props.suppliers.map(supplier => {
             return (
@@ -57,6 +57,15 @@ class NewPurchaseOrderRaw extends React.Component {
             </div>
         </div>
     )
+    renderTextArea = ({ input, label, type, meta, children }) => (
+        <div>
+            <label>{label}</label>
+            <div>
+                <textarea {...input} placeholder={label} rows="10" cols="5" />
+                {this.renderError(meta)}
+            </div>
+        </div>
+    );
     renderPackingMaterials() {
         return this.props.packingMaterials.map(packingMaterial => {
             return (
@@ -134,12 +143,22 @@ class NewPurchaseOrderRaw extends React.Component {
                                     <option>-Select Supplier-</option>
                                     {this.rendeSuppliers()}
                                 </Field>
-                            </div>                           
+                            </div>
+                            <div className="six wide field">
+                                <label>Reference (Optional) </label>
+                                <Field name="reference" component={this.renderInput} placeholder="Reference" type="text" >
+                                </Field>
+                            </div>
                             <div className="fields">
                                 <div className="sixteen wide field">
                                     <label>Packing Material- </label>
                                     <FieldArray name="packingMaterials" component={this.renderPackingMaterialsDropDown} />
                                 </div>
+                            </div>
+                            <div className="six wide field">
+                                <label>Terms & Conditions <span style={{ color: "red", fontSize: "18px" }}>*</span>(Maximum 250 characters)</label>
+                                <Field name="conditions" component={this.renderTextArea} placeholder="Terms & Conditions" type="text" >
+                                </Field>
                             </div>
                             <div className="field">
                                 <Link to={"/purchase-order-dashboard-packing"} type="button" className="ui button">Back</Link>
@@ -162,6 +181,11 @@ const validate = (formValues) => {
     if (!formValues.supplierInvoice) {
         errors.supplierInvoice = 'Required';
     }
+    if (!formValues.conditions) {
+        errors.conditions = 'Required';
+    } else if (formValues.conditions.length > 250) {
+        errors.conditions = 'Maximum 250 characters'
+    }
     if (!formValues.packingMaterials || !formValues.packingMaterials.length) {
         errors.packingMaterials = { _error: 'At least one material should be add' }
     } else {
@@ -175,6 +199,9 @@ const validate = (formValues) => {
             if (!packingMaterials || !packingMaterials.quantity) {
                 productErrors.quantity = 'Required'
                 packingMaterialsArrayErrors[index] = productErrors
+            } else if (packingMaterials.quantity < 0) {
+                productErrors.quantity = 'Quantity should be more than 0'
+                packingMaterialsArrayErrors[index] = productErrors
             }
             if (!packingMaterials || !packingMaterials.uom) {
                 productErrors.uom = 'Required'
@@ -182,6 +209,9 @@ const validate = (formValues) => {
             }
             if (!packingMaterials || !packingMaterials.unitPrice) {
                 productErrors.unitPrice = 'Required'
+                packingMaterialsArrayErrors[index] = productErrors
+            } else if (packingMaterials.unitPrice < 0) {
+                productErrors.unitPrice = 'Unit price should be more than 0'
                 packingMaterialsArrayErrors[index] = productErrors
             }
         })
@@ -198,8 +228,8 @@ const mapStateToProps = (state) => {
     return { errorMessage: state, suppliers: suppliers, packingMaterials: packingMaterials, purchaseOrders: purchaseOrders };
 }
 const formWrapped = reduxForm({
-    form: 'newPurchaseOrderRaw',
+    form: 'newPurchaseOrderPacking',
     validate: validate
-})(NewPurchaseOrderRaw);
+})(NewPurchaseOrderPacking);
 
 export default connect(mapStateToProps, { fetchSuppliers, fetchPackingMaterials, createPurchaseOrderPacking })(formWrapped);
