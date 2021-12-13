@@ -139,7 +139,7 @@ class InvoiceList extends React.Component {
                                 <th>Products</th>
                                 <th>Quantities</th>
                                 <th>Rate</th>
-                                <th>Discount</th>
+                                <th>Claim</th>
                                 <th></th>
                             </tr></thead>
                         <tbody>

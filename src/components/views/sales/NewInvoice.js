@@ -95,7 +95,7 @@ class NewInvoice extends React.Component {
                                 </Field>
                             </div>
                             <div className="six wide field">
-                                <Field name={`${products}.discount`} type="number" required component={this.renderInput} placeholder="Discount" >
+                                <Field name={`${products}.discount`} type="number" required component={this.renderInput} placeholder="Claim" >
                                 </Field>
                             </div>
                             <div className="six wide field">

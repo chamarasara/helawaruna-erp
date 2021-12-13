@@ -155,7 +155,7 @@ class EditInvoice extends React.Component {
         for (let i = 0; i < Math.min(quantities.length); i++) {
             let quantity = quantities[i]
             let rate = rates[i]
-            totalValue[i] = (quantity.quantity * rate.sellingPrice) / 100 * (100 - quantity.discount);
+            totalValue[i] = (quantity.quantity * rate.sellingPrice) / 100 * (quantity.discount);
             console.log(totalValue.reduce((a, b) => a + b, 0))
             //return totalValue
         }
@@ -191,7 +191,7 @@ class EditInvoice extends React.Component {
         for (let i = 0; i < Math.min(quantities.length); i++) {
             let quantity = quantities[i]
             let rate = rates[i]
-            totalValue[i] = (quantity.quantity * rate.sellingPrice) / 100 * (100 - quantity.discount);            
+            totalValue[i] = (quantity.quantity * rate.sellingPrice) / 100 * (quantity.discount);            
         }
         const total = totalValue.reduce((a, b) => a + b, 0)
         const subtotal = total + this.getAdditionalChargesTotal()
@@ -277,10 +277,7 @@ class EditInvoice extends React.Component {
                         }
                         )
                     }
-                </td>
-                <td style={{ textAlign: "right" }}>
-                    {this.getDiscountValue()}
-                </td>
+                </td>                
                 <td style={{ textAlign: "right" }}>
                     {
                         this.props.invoice.products.map(currency => {
@@ -291,8 +288,8 @@ class EditInvoice extends React.Component {
                         )
                     }
                 </td>
-                <td style={{ textAlign: "right" }}>
-                    {this.getTotal()}
+                <td colSpan="4" style={{ textAlign: "right" }}>
+                    {this.getDiscountValue()}
                 </td>
             </tr>
         )
@@ -880,16 +877,15 @@ class EditInvoice extends React.Component {
                             <tr>
                                 <th colSpan="12" style={{ color: "red" }}><h4>Invoice Details</h4></th>
                             </tr>
-                            <tr>
+                            <tr colSpan="12">
                                 <th>Product Code</th>
                                 <th>Product Name</th>
                                 <th>UOM</th>
                                 <th style={{ textAlign: "right" }}>Quantity</th>
                                 <th style={{ textAlign: "right" }}>Rate</th>
-                                <th style={{ textAlign: "right" }}>Discount (%)</th>
-                                <th style={{ textAlign: "right" }}>Discount Amount</th>
+                                <th style={{ textAlign: "right" }}>Claim (%)</th>
                                 <th style={{ textAlign: "right" }}>Currency</th>
-                                <th style={{ textAlign: "right" }}>Total</th>
+                                <th colSpan="4" style={{ textAlign: "right" }}>Total</th>
                             </tr>
                         </thead>
                         <tbody>
